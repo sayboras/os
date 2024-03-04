@@ -20,6 +20,7 @@ environment:
       - clang~15
       - cmake
       - coreutils
+      - curl
       # We need to stick to gcc 12 for now, envoy doesn't build with gcc >= 13
       - gcc-12-default
       - git
@@ -33,13 +34,14 @@ environment:
       - openjdk-11
       - patch
       - python3-dev
+      - xz
       - samurai
       - wolfi-baselayout
 
 vars:
   # From latest cilium/cilium release:
   #   https://github.com/cilium/cilium/blob/v1.14.7/images/cilium/Dockerfile
-  CILIUM_PROXY_COMMIT: "39dc41f86c465d2a2d16386339dc0bf4d425babc"
+  CILIUM_PROXY_COMMIT: "556cd5a60df80a8df7df681062e0cdb620de36de"
 
 pipeline:
   - runs: |
@@ -81,6 +83,8 @@ pipeline:
         --nokeep_state_after_build \
         --notrack_incremental_state \
         --conlyopt="-Wno-strict-prototypes" \
+        --define=boringssl=fips \
+        --sandbox_debug \
         --verbose_failures -c opt //:cilium-envoy
 
       cp -v bazel-bin/cilium-envoy ${{targets.destdir}}/usr/bin/cilium-envoy
